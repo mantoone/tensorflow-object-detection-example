@@ -17,11 +17,12 @@
 
 
 import base64
-import cStringIO
+from io import StringIO
+from io import BytesIO
 import sys
 import tempfile
 
-MODEL_BASE = '/opt/models/research'
+MODEL_BASE = '/app/models/research'
 sys.path.append(MODEL_BASE)
 sys.path.append(MODEL_BASE + '/object_detection')
 sys.path.append(MODEL_BASE + '/slim')
@@ -52,8 +53,10 @@ def before_request():
   pass
 
 
-PATH_TO_CKPT = '/opt/graph_def/frozen_inference_graph.pb'
-PATH_TO_LABELS = MODEL_BASE + '/object_detection/data/mscoco_label_map.pbtxt'
+#PATH_TO_CKPT = '/opt/graph_def/frozen_inference_graph.pb'
+#PATH_TO_LABELS = MODEL_BASE + '/object_detection/data/mscoco_label_map.pbtxt'
+PATH_TO_CKPT = MODEL_BASE + '/mobilenet_ssd_ts/frozen_inference_graph.pb'
+PATH_TO_LABELS = MODEL_BASE + '/trafficsign/labelmap.prototxt'
 
 content_types = {'jpg': 'image/jpeg',
                  'jpeg': 'image/jpeg',
@@ -136,11 +139,9 @@ def draw_bounding_box_on_image(image, box, color='red', thickness=4):
 
 
 def encode_image(image):
-  image_buffer = cStringIO.StringIO()
-  image.save(image_buffer, format='PNG')
-  imgstr = 'data:image/png;base64,{:s}'.format(
-      base64.b64encode(image_buffer.getvalue()))
-  return imgstr
+  byte_io = BytesIO()
+  image.save(byte_io, 'PNG')
+  return 'data:image/png;base64,'+base64.b64encode(byte_io.getvalue()).decode()
 
 
 def detect_objects(image_path):
@@ -149,8 +150,8 @@ def detect_objects(image_path):
   image.thumbnail((480, 480), Image.ANTIALIAS)
 
   new_images = {}
-  for i in range(num_detections):
-    if scores[i] < 0.7: continue
+  for i in range(int(num_detections)):
+    if scores[i] < 0.1: continue
     cls = classes[i]
     if cls not in new_images.keys():
       new_images[cls] = image.copy()
@@ -160,7 +161,7 @@ def detect_objects(image_path):
   result = {}
   result['original'] = encode_image(image.copy())
 
-  for cls, new_image in new_images.iteritems():
+  for cls, new_image in new_images.items():
     category = client.category_index[cls]['name']
     result[category] = encode_image(new_image)
 
@@ -193,4 +194,4 @@ client = ObjectDetector()
 
 
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=80, debug=False)
+  app.run(host='0.0.0.0', port=8000, debug=False)
