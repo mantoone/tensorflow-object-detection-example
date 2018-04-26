@@ -21,8 +21,8 @@ from flask import request
 from flask import Response
 
 
-USERNAME = 'username'
-PASSWORD = 'passw0rd'
+USERNAME = 'trafficsign'
+PASSWORD = 'd3t3ction'
 
 
 def check_auth(username, password):

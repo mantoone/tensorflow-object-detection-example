@@ -94,8 +94,8 @@ This application provides a simple user authentication mechanism.
  part in `/opt/object_detection_app/decorator.py`.
 
 ```
-USERNAME = 'username'
-PASSWORD = 'passw0rd'
+USERNAME = 'trafficsign'
+PASSWORD = 'd3t3ction'
 ```
 
 ## Launch the demo application
