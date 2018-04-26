@@ -42,17 +42,14 @@
 
     <div id="result">
       {% if result|length > 0 %}
-        <div id="label">original</div>
-        <div><img id="photo" src="{{ result['original'] }}" align="left" hspace="10" vspace="10"></div>
+        <div id="label">detected</div>
+        <div><img id="photo" src="{{ result['detected'] }}" align="left" hspace="10" vspace="10"></div>
         <p>
-          <a href="javascript:void(0);" onclick="ChangePhoto('original');">original</a>
           </br>
           {% for name, img in result.items() %}
-            {% if name != 'original' %}
               <a href="javascript:void(0);"
                  onclick="ChangePhoto('{{ name }}', '{{ result[ name ] }}');">{{ name }}</a>
               </br>
-            {% endif %}
           {% endfor %}
         </p>
       {% endif %}

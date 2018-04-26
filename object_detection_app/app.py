@@ -43,6 +43,8 @@ from werkzeug.datastructures import CombinedMultiDict
 from wtforms import Form
 from wtforms import ValidationError
 
+from utils import visualization_utils as vis_util
+
 
 app = Flask(__name__)
 
@@ -150,20 +152,24 @@ def detect_objects(image_path):
   image.thumbnail((480, 480), Image.ANTIALIAS)
 
   new_images = {}
-  for i in range(int(num_detections)):
-    if scores[i] < 0.1: continue
-    cls = classes[i]
-    if cls not in new_images.keys():
-      new_images[cls] = image.copy()
-    draw_bounding_box_on_image(new_images[cls], boxes[i],
-                               thickness=int(scores[i]*10)-4)
+  detected = image.copy()
 
+  print(scores)
+  detected = np.array(detected)
+  vis_util.visualize_boxes_and_labels_on_image_array(
+    detected,
+    boxes,
+    classes,
+    scores,
+    client.category_index,
+    use_normalized_coordinates=True,
+    min_score_thresh=.3,
+    line_thickness=2)
+
+  detected = Image.fromarray(detected)
   result = {}
   result['original'] = encode_image(image.copy())
-
-  for cls, new_image in new_images.items():
-    category = client.category_index[cls]['name']
-    result[category] = encode_image(new_image)
+  result['detected'] = encode_image(detected)
 
   return result
 
